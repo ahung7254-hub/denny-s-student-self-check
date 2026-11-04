@@ -274,6 +274,15 @@ body.is-teacher .teacher{display:flex}
         <select id="wStep"></select>
         <p class="wdesc" id="wDesc"></p>
       </div>
+      <div class="field hide" id="wHalfRow">
+        <style>.seg.seg3{grid-template-columns:repeat(3,1fr);align-items:stretch}.seg.seg3 label{font-size:14px;padding:10px 2px;margin:0;display:flex;align-items:center;justify-content:center}</style>
+        <span class="lab">DAY 안에서 <small>(하루 50개 중)</small></span>
+        <div class="seg seg3">
+          <label><input type="radio" name="whalf" value="0" checked>50개 전부</label>
+          <label><input type="radio" name="whalf" value="1">1~25번</label>
+          <label><input type="radio" name="whalf" value="2">26~50번</label>
+        </div>
+      </div>
       <div class="field">
         <span class="lab">DAY <small>(여러 개 고르면 섞어서 나와요)</small></span>
         <div class="nums" id="wDays"></div>
@@ -615,6 +624,8 @@ const wStep = () => VOCAB.find(s => s.id === $("wStep").value) || VOCAB[0];
 const wKey = p => p.s + "|" + p.no;
 const pad = (n, k) => String(n).padStart(k, "0");
 const wIsSeq = () => document.querySelector('input[name="wmode"]:checked').value === "seq";
+const wHalfOK = st => !st.d && (st.per || 50) === 50;
+const wHalf = () => { const r = document.querySelector('input[name="whalf"]:checked'); return r && wHalfOK(wStep()) ? +r.value : 0; };
 const wSelDays = () => [...$("wDays").querySelectorAll("input:checked")].map(i => +i.value);
 const wRevealed = () => !!wCur && $("sentence").classList.contains("revealed");
 function wWrong(id){ try{ const v = JSON.parse(recall("wrong:"+id) || "[]"); return new Set(Array.isArray(v) ? v : []); }catch(e){ return new Set(); } }
@@ -637,14 +648,16 @@ function wRenderDays(){
   $("wDays").innerHTML = dl.map(d => (pstart[d] ? `<span class="gname${d === dl[0] ? "" : " gsep"}">${esc(pstart[d])}</span>` : "") +
     `<label><input type="checkbox" value="${d}"${saved.includes(d) ? " checked" : ""}>DAY ${pad(d,2)}</label>`).join("");
   $("wDesc").textContent = `${st.w.length}${st.unit || "단어"}` + (st.d ? ` · 지금 들어온 DAY: ${dl.map(d => pad(d,2)).join(", ")}` : "") + (st.desc ? " · " + st.desc : "");
+  $("wHalfRow").classList.toggle("hide", !wHalfOK(st));
+  const hr = document.querySelector(`input[name="whalf"][value="${recall("whalf:"+st.id) || "0"}"]`); if(hr) hr.checked = true;
   wBuild(true);
 }
 function wBuild(fresh){
-  const st = wStep(), days = new Set(wSelDays()), wrong = wWrong(st.id), only = $("wWrongOnly").checked;
+  const st = wStep(), days = new Set(wSelDays()), wrong = wWrong(st.id), only = $("wWrongOnly").checked, half = wHalf();
   store("wdays:"+st.id, JSON.stringify([...days]));
   const dn = {}; const all = st.w.map((x, i) => {
     const day = st.d ? st.d[i] : Math.floor(i/(st.per || 50))+1, k = st.d ? (dn[day] = (dn[day] || 0) + 1) : i+1;
-    return {s:st.id, no: st.d ? day*1000 + k : i+1, dno:k, day, w:x[0], pr:x[1], m:x[2], x}; }).filter(p => days.has(p.day));
+    return {s:st.id, no: st.d ? day*1000 + k : i+1, dno:k, day, pos: st.d ? k : i % (st.per || 50) + 1, w:x[0], pr:x[1], m:x[2], x}; }).filter(p => days.has(p.day) && (!half || (half === 1 ? p.pos <= 25 : p.pos > 25)));
   const prevSeq = wSeq;
   wPool = only ? all.filter(p => wrong.has(p.no)) : all;
   if(fresh){ wUsed.clear(); wSeq = -1; wLast = null; }
@@ -769,6 +782,8 @@ if(recall("wmode") === "seq") document.querySelector('input[name="wmode"][value=
 document.querySelectorAll('input[name="appmode"]').forEach(r => r.onchange = () => setMode(r.value));
 $("wStep").onchange = () => { store("wstep", $("wStep").value); wCur = null; $("wWrongOnly").checked = false; wRenderDays(); wRestart("단계를 바꿨어요. DAY를 고르고 단어 뽑기를 누르세요"); };
 $("wDays").onchange = () => wBuild(false);
+document.querySelectorAll('input[name="whalf"]').forEach(r => r.onchange = () => { store("whalf:"+wStep().id, r.value); wBuild(true);
+  wRestart(r.value === "0" ? "고른 DAY의 50개가 전부 나와요. 단어 뽑기를 누르세요" : `고른 DAY의 ${r.value === "1" ? "1~25번" : "26~50번"}만 나와요. 단어 뽑기를 누르세요`); });
 $("dAll").onclick = () => { $("wDays").querySelectorAll("input").forEach(i => i.checked = true); wBuild(false); };
 $("dNone").onclick = () => { $("wDays").querySelectorAll("input").forEach(i => i.checked = false); wBuild(false); };
 document.querySelectorAll('input[name="wmode"]').forEach(r => r.onchange = () => {
