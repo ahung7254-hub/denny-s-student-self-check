@@ -283,7 +283,23 @@ body.is-teacher .teacher{display:flex}
         <p class="wdesc" id="wDesc"></p>
       </div>
       <div class="field hide" id="wHalfRow">
-        <style>.seg.seg3{grid-template-columns:repeat(3,1fr);align-items:stretch}.seg.seg3 label{font-size:14px;padding:10px 2px;margin:0;display:flex;align-items:center;justify-content:center}</style>
+        <style>.seg.seg3{grid-template-columns:repeat(3,1fr);align-items:stretch}.seg.seg3 label{font-size:14px;padding:10px 2px;margin:0;display:flex;align-items:center;justify-content:center}
+/* ── 휴대폰 가로 화면 (2026-11-24) ── */
+@media (orientation:landscape) and (max-height:500px) and (max-width:1100px){
+  .app{grid-template-columns:1fr;grid-template-rows:auto auto;height:auto;min-height:100%}
+  main{height:100vh;height:100dvh;min-height:0;margin:0;border-radius:0}
+  .stage-top{padding:8px 16px 0}
+  .mascot img{width:34px;height:34px}
+  .bubble{font-size:12px;padding:4px 9px;white-space:nowrap}
+  .stage{padding:4px 22px!important;overflow:hidden}
+  main.checking .stage{padding-right:22px!important;padding-bottom:4px!important}
+  .note,.jflow,.hint{display:none!important}
+  .stage-btns{position:relative;padding:0 12px 8px;gap:8px;background:none;border:0;justify-content:center;flex-wrap:wrap;margin:0!important;left:auto;right:auto}
+  .stage-btns button{min-height:38px;padding:6px 14px;font-size:14px;flex:0 0 auto}
+  .jko,.ck .ko{font-size:.6em}
+  .fulltr{font-size:.5em}
+}
+</style>
         <span class="lab">DAY 안에서 <small>(하루 50개 중)</small></span>
         <div class="seg seg3">
           <label><input type="radio" name="whalf" value="0" checked>50개 전부</label>
@@ -447,12 +463,12 @@ function toggleGloss(){ if(hasPick) setGloss(!$("sentence").classList.contains("
 function draw(){
   if(!scope() || !POOL.length) return;
   if(isSeq()){
-    if(window.innerWidth <= 760) document.querySelector("main").scrollIntoView({behavior:"smooth"});
+    if(window.innerWidth <= 760 || (window.innerHeight <= 500 && window.innerWidth > window.innerHeight)) document.querySelector("main").scrollIntoView({behavior:"smooth"});
     seqIdx++;
     if(seqIdx >= POOL.length){ seqIdx = POOL.length; lastKey = null; show(null); updateStatus(); return; }
     const pick = POOL[seqIdx]; lastKey = key(pick); used.add(lastKey); show(pick); updateStatus(); return;
   }
-  if(window.innerWidth <= 760) document.querySelector("main").scrollIntoView({behavior:"smooth"});
+  if(window.innerWidth <= 760 || (window.innerHeight <= 500 && window.innerWidth > window.innerHeight)) document.querySelector("main").scrollIntoView({behavior:"smooth"});
   let p = POOL;
   if($("norepeat").checked){ p = p.filter(x=>!used.has(key(x))); if(!p.length){ show(null); return; } }
   const pick = p[Math.floor(Math.random()*p.length)];
@@ -747,7 +763,7 @@ function wShow(p){
 }
 function wDraw(){
   if(MODE !== "w" || !wPool.length) return;
-  if(window.innerWidth <= 760) document.querySelector("main").scrollIntoView({behavior:"smooth"});
+  if(window.innerWidth <= 760 || (window.innerHeight <= 500 && window.innerWidth > window.innerHeight)) document.querySelector("main").scrollIntoView({behavior:"smooth"});
   let pick;
   if(wIsSeq()){
     wSeq++;
