@@ -170,6 +170,8 @@ body.is-teacher .teacher{display:flex}
 @media (prefers-reduced-motion:reduce){.fx *,.fx::before{animation:none!important}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 @media (max-width:760px){
+  .ck .ko{font-size:.6em}
+  .fulltr{font-size:.56em}
   .app{grid-template-columns:1fr;grid-template-rows:auto 1fr;height:auto;min-height:100%}
   aside{padding:18px 16px;gap:14px}
   .actions{margin-top:0}
@@ -425,7 +427,7 @@ function fitSentence(){
   const mobile = window.innerWidth <= 760, cs = getComputedStyle(st);
   const availW = st.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
   const availH = st.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
-  let size = mobile ? Math.min(34, Math.max(22, window.innerWidth*0.065)) : Math.min(46, Math.max(24, st.clientWidth/19));
+  let size = mobile ? Math.min(34, Math.max(26, window.innerWidth*0.074)) : Math.min(46, Math.max(24, st.clientWidth/19));
   const fits = () => el.scrollWidth <= availW + 1 && (mobile || el.offsetHeight <= availH);
   el.style.fontSize = size+"px";
   while(!fits() && size > 15){ size -= 1; el.style.fontSize = size+"px"; }
